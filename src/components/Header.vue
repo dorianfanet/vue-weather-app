@@ -1,26 +1,40 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
+interface AutocompletType {
+    lat: Number,
+    lon: Number,
+    name: String,
+    state: String
+  }
+
 const searchInput = ref('')
-const autocomplete = ref([])
+const autocomplete = ref<AutocompletType[]>([])
+const location = ref('')
 
 watch(searchInput, (newSearchInput) => {
   if(newSearchInput.length > 1){
-    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${newSearchInput}&limit=5&appid=74f5453e091823ce11345a217669f3ff`)
+    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${newSearchInput}&limit=5&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
     .then(response => response.json())
     .then(data => autocomplete.value = data)
   }
 })
+
+function handleLinkClick(loc: string){
+  autocomplete.value = []
+  searchInput.value = ''
+  location.value = loc
+}
 </script>
 
 <template>
   <header class="header">
-    <h1>Paris, France</h1>
+    <h1>{{ location }}</h1>
     <div class="inputContainer">
       <input v-model="searchInput" type="text" placeholder="Search location" class="searchInput">
       <ul v-if="autocomplete.length > 0" class="autocomplete">
         <li v-for="result in autocomplete">
-          <router-link :to='`${result.lat}_${result.lon}`' @click="autocomplete = []">{{ result.name }}, {{ result.state }}</router-link>
+          <router-link :to='`${result.lat}_${result.lon}`' @click="() => handleLinkClick(`${result.name}, ${result.state}`)">{{ result.name }}, {{ result.state }}</router-link>
         </li>
       </ul>
     </div>
@@ -54,8 +68,9 @@ watch(searchInput, (newSearchInput) => {
   border: 0;
   border-radius: 20px;
   font-family: 'Outfit';
-  padding: 0 0 0 2em;
+  padding: 0 0 0 1.5em;
   color: white;
+  font-size: 18px;
 }
 
 .autocomplete{
