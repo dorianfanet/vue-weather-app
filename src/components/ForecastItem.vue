@@ -13,7 +13,7 @@ import Overcast from '../assets/Overcast.vue';
 
 const props = defineProps({
   date: Number,
-  temperature: Number,
+  temperature: Object,
   weather: Number
 })
 
@@ -35,7 +35,8 @@ const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
     <Few v-if="weather === 801"/>
     <Scattered v-if="weather === 802"/>
     <Overcast v-if="weather === 803 || weather === 804 "/>
-    <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature) }}º</p>
+    <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature.day) }}º</p>
+    <p v-if="props.temperature" class="temp-min">{{ Math.floor(props.temperature.min) }}º</p>
   </div>
 </template>
 
@@ -47,7 +48,7 @@ const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  height: 210px;
+  height: 250px;
   justify-content: space-between;
 }
 .f-item-container svg{
@@ -63,5 +64,10 @@ const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
   font-size: 42px;
   font-weight: 700;
   margin: 0;
+}
+.temp-min{
+  margin: -15px 0 0 0;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.5);
 }
 </style>

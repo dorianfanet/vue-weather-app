@@ -44,7 +44,7 @@ watch(() => route.params.id, (newId) => {
       <li v-for="day in forecast.daily" :key="day.dt">
         <ForecastItem 
           :date="day.dt"
-          :temperature="day.temp.day"
+          :temperature="day.temp"
           :weather="day.weather[0].id"
         />
       </li>
