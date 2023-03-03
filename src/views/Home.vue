@@ -25,6 +25,7 @@ interface ForecastType {
 }
 
 interface MapDataType {
+  loading: boolean,
   currentLocation: {
     lat: number,
     lon: number,
@@ -46,6 +47,10 @@ const forecast = ref<ForecastType>()
 const mapData = ref<MapDataType>()
 
 watch(() => route.params.id, (newId) => {
+  mapData.value = {
+    ...mapData.value,
+    loading: true
+  }
 
   const splittedId = (newId as string).split('_')
   forecast.value = undefined
@@ -56,6 +61,7 @@ watch(() => route.params.id, (newId) => {
     console.log(data)
 
     mapData.value = {
+      loading: false,
       currentLocation: {
         lat: data.lat,
         lon: data.lon,
@@ -76,15 +82,17 @@ watch(() => route.params.id, (newId) => {
   <main class="container">
     <section class="forecast">
       <h2 class="forecast-title">Next 7 days</h2>
-      <ul v-if="forecast" class="forecast-container">
-        <li v-for="day in forecast.daily" :key="day.dt">
-          <ForecastItem 
-            :date="day.dt"
-            :temperature="day.temp"
-            :weather="day.weather[0].id"
-          />
-        </li>
-      </ul>
+      <Transition name="fade">
+        <ul v-if="forecast" class="forecast-container">
+          <li v-for="day in forecast.daily" :key="day.dt">
+            <ForecastItem 
+              :date="day.dt"
+              :temperature="day.temp"
+              :weather="day.weather[0].id"
+            />
+          </li>
+        </ul>
+      </Transition>
     </section>
     <section class="map">
       <h2 class="forecast-title">Weather map</h2>
@@ -97,6 +105,15 @@ watch(() => route.params.id, (newId) => {
 </template>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 main.container{
   display: grid;
   grid-template-rows: 40% 60%;

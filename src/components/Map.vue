@@ -83,13 +83,20 @@ watch(() => props.mapData, (newMapData) => {
     map-style="mapbox://styles/dorianfanet/clesfa2ur000p01ob0y77otqo"
     access-token='pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg'
     :center="[0, 0]"
-    :zoom="1"
+    :zoom="9"
     @mb-created="(mapboxInstance) => map = mapboxInstance"
   >
-    <MapboxMarker
-      :lng-lat="[props.mapData.currentLocation.lon, props.mapData.currentLocation.lat]">
-      <Marker />
-    </MapboxMarker>
+    <Transition name="fade">
+      <MapboxMarker
+        v-if="props.mapData && props.mapData.loading === false"
+        :lng-lat="[props.mapData.currentLocation.lon, props.mapData.currentLocation.lat]"
+      >
+        <Marker
+          :temperature="props.mapData.currentLocation.weather.temp"
+          :weather="props.mapData.currentLocation.weather.weather[0].id"
+        />
+      </MapboxMarker>
+    </Transition>
   </MapboxMap>
 </template>
 
@@ -97,5 +104,14 @@ watch(() => props.mapData, (newMapData) => {
 #map{
   height: calc(100% - 46px);
   border-radius: 20px;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
