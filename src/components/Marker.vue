@@ -11,15 +11,17 @@ import Scattered from '../assets/Scattered.vue';
 import Overcast from '../assets/Overcast.vue';
 
 const props = defineProps({
-  temperature: Object,
-  weather: Number
+  temperature: Number,
+  weather: Number,
+  type: String
 })
 
 console.log(props)
+
 </script>
 
 <template>
-  <div class="marker">
+  <div :class="{ marker: weather, current: type === 'current' }">
     <Thunderstorm v-if="weather && weather >= 200 && weather <= 299" />
     <Drizzle v-if="weather && weather >= 300 && weather <= 399"/>
     <Shower v-if="weather && weather >= 500 && weather <= 599"/>
@@ -30,20 +32,24 @@ console.log(props)
     <Few v-if="weather === 801"/>
     <Scattered v-if="weather === 802"/>
     <Overcast v-if="weather === 803 || weather === 804 "/>
-    <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature.day) }}º</p>
+    <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature) }}º</p>
   </div>
 </template>
 
 <style scoped>
 .marker{
-  background-color: var(--accentColor);
+  background-color: var(--mainColor);
   padding: 1em;
-  color: var(--darkTextColor);
+  color: var(--brightTextColor);
   border-radius: 10px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 10px;
+}
+.current{
+  background-color: var(--accentColor);
+  color: var(--darkTextColor);
 }
 .marker svg{
   height: 24px;

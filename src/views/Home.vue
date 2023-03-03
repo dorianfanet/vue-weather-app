@@ -46,35 +46,80 @@ const forecast = ref<ForecastType>()
 
 const mapData = ref<MapDataType>()
 
-watch(() => route.params.id, (newId) => {
+watch(() => route.params.id, async (newId) => {
   mapData.value = {
     ...mapData.value,
     loading: true
   }
 
+  mapData.value = await getMapData(newId)
+})
+
+async function getMapData(newId){
   const splittedId = (newId as string).split('_')
   forecast.value = undefined
-  fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${splittedId[0]}&lon=${splittedId[1]}&units=metric&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
+  const currentLocation = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${splittedId[0]}&lon=${splittedId[1]}&units=metric&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
   .then(response => response.json())
   .then(data => {
     forecast.value = data
     console.log(data)
 
-    mapData.value = {
-      loading: false,
-      currentLocation: {
-        lat: data.lat,
-        lon: data.lon,
+    return data
+
+    // currentLocation = {
+    //     lat: data.lat,
+    //     lon: data.lon,
+    //     weather: {
+    //       temp: {
+    //         day: data.current.temp
+    //       },
+    //       weather: data.current.weather
+    //     }
+    //   }
+  })
+  .catch(err => console.log(err))
+
+  const options = {
+    method: 'GET',
+    headers: {
+      'X-RapidAPI-Key': '7119993a2dmshf7ee14d31d30ca5p1c7c45jsn662b348749e6',
+      'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
+    }
+  };
+
+  const otherLocations = fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${splittedId[0]}${splittedId[1].charAt(0) === '-' ? '' : '+'}${splittedId[1]}/nearbyCities?radius=100&limit=10&sort=-population&asciiMode=false&types=CITY`, options)
+    .then(response => response.json())
+    .then(response => {
+      console.log(response)
+      return response
+      // fullMapData = {
+      //   currentLocation: currentLocation,
+      //   loading: false,
+      //   otherLocations: response.data
+      // }
+    })
+    .catch(err => console.error(err));
+
+  const resolvedCurrentLocation = await currentLocation
+  const resovedOtherLocations = await otherLocations
+  
+  const fullMapData = {
+    loading: false,
+    currentLocation: {
+        lat: resolvedCurrentLocation.lat,
+        lon: resolvedCurrentLocation.lon,
         weather: {
           temp: {
-            day: data.current.temp
+            day: resolvedCurrentLocation.current.temp
           },
-          weather: data.current.weather
+          weather: resolvedCurrentLocation.current.weather
         }
-      }
-    }
-  })
-})
+      },
+    otherLocations: resovedOtherLocations.data
+  }
+
+  return fullMapData
+}
 
 const widthRef = ref(8)
 

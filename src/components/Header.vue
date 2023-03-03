@@ -109,6 +109,7 @@ function handleLinkClick(loc: string){
   }
   .inputContainer{
     top: 45px;
+    width: 70%;
   }
 }
 

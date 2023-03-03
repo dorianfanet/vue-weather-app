@@ -17,8 +17,6 @@ const props = defineProps({
   weather: Number
 })
 
-console.log(props.date, props.temperature)
-
 const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
 </script>
 
