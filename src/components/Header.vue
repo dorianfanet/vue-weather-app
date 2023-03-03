@@ -46,6 +46,7 @@ function handleLinkClick(loc: string){
   display: flex;
   position: relative;
   align-items: center;
+  height: 35px;
 }
 
 .header h1{

@@ -48,7 +48,7 @@ const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  height: 250px;
+  height: calc(100% - 60px);
   justify-content: space-between;
 }
 .f-item-container svg{
