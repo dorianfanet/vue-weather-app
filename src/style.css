@@ -81,6 +81,11 @@ button:focus-visible {
   cursor: pointer;
 }
 
+.mapboxgl-map{
+  height: calc(100% - 46px);
+  border-radius: 20px;
+}
+
 /* @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
