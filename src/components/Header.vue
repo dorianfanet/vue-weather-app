@@ -50,7 +50,7 @@ function handleLinkClick(loc: string){
 }
 
 .header h1{
-  color: white;
+  color: var(--brightTextColor);
   margin: 0;
   font-size: 28px;
 }
@@ -70,7 +70,7 @@ function handleLinkClick(loc: string){
   border-radius: 20px;
   font-family: 'Outfit';
   padding: 0 0 0 1.5em;
-  color: white;
+  color: var(--brightTextColor);
   font-size: 18px;
 }
 
@@ -91,7 +91,7 @@ function handleLinkClick(loc: string){
 }
 
 .autocomplete a{
-  color: white;
+  color: var(--brightTextColor);
   display: block;
   padding: .4em;
   width: calc(100% - .8em);
@@ -101,6 +101,15 @@ function handleLinkClick(loc: string){
 
 .autocomplete a:hover{
   background-color: var(--thirdColor);
+}
+
+@media screen and (max-width: 1024px) {
+  .header{
+    flex-direction: column;
+  }
+  .inputContainer{
+    top: 45px;
+  }
 }
 
 </style>

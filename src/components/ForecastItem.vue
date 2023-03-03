@@ -68,6 +68,6 @@ const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
 .temp-min{
   margin: -15px 0 0 0;
   font-size: 24px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--darkTextColorAlpha);
 }
 </style>

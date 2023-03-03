@@ -38,7 +38,7 @@ console.log(props)
 .marker{
   background-color: var(--accentColor);
   padding: 1em;
-  color: var(--thirdColor);
+  color: var(--darkTextColor);
   border-radius: 10px;
   display: grid;
   grid-template-columns: 1fr 1fr;

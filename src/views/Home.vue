@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Header from '../components/Header.vue';
 import ForecastItem from '../components/ForecastItem.vue'
@@ -75,6 +75,29 @@ watch(() => route.params.id, (newId) => {
     }
   })
 })
+
+const widthRef = ref(8)
+
+function checkSize(size){
+  if(size >= 1500){
+    widthRef.value = 8
+  } else {
+    const buffer = Math.abs(size - 1500)
+    const rest = Math.floor(buffer / 180)
+  
+    console.log(8 - rest)
+  
+    widthRef.value = 8 - rest
+  }
+}
+
+
+onMounted(() => {
+  window.addEventListener('resize', () => checkSize(window.innerWidth))
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', () => checkSize(window.innerWidth))
+})
 </script>
 
 <template>
@@ -84,7 +107,7 @@ watch(() => route.params.id, (newId) => {
       <h2 class="forecast-title">Next 7 days</h2>
       <Transition name="fade">
         <ul v-if="forecast" class="forecast-container">
-          <li v-for="day in forecast.daily" :key="day.dt">
+          <li v-for="day in forecast.daily.slice(0,widthRef)" :key="day.dt">
             <ForecastItem 
               :date="day.dt"
               :temperature="day.temp"
@@ -127,7 +150,7 @@ main.container{
 }
 .forecast-container{
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(v-bind(widthRef), 1fr);
   padding: 0;
   gap: 15px;
   margin: 0;
