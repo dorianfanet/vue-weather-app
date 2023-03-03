@@ -24,9 +24,29 @@ interface ForecastType {
   ]
 }
 
+interface MapDataType {
+  currentLocation: {
+    lat: number,
+    lon: number,
+    weather: {
+      temp: {
+        day: number
+      },
+      weather: [
+        {
+          id: number
+        }
+      ]
+    }
+  }
+}
+
 const forecast = ref<ForecastType>()
 
+const mapData = ref<MapDataType>()
+
 watch(() => route.params.id, (newId) => {
+
   const splittedId = (newId as string).split('_')
   forecast.value = undefined
   fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${splittedId[0]}&lon=${splittedId[1]}&units=metric&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
@@ -34,6 +54,19 @@ watch(() => route.params.id, (newId) => {
   .then(data => {
     forecast.value = data
     console.log(data)
+
+    mapData.value = {
+      currentLocation: {
+        lat: data.lat,
+        lon: data.lon,
+        weather: {
+          temp: {
+            day: data.current.temp
+          },
+          weather: data.current.weather
+        }
+      }
+    }
   })
 })
 </script>
@@ -55,7 +88,10 @@ watch(() => route.params.id, (newId) => {
     </section>
     <section class="map">
       <h2 class="forecast-title">Weather map</h2>
-      <Map />
+      <Map
+        v-if="mapData"
+        :mapData="mapData"
+      />
     </section>
   </main>
 </template>
