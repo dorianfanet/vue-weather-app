@@ -158,7 +158,6 @@ async function getWeather(coordinates){
     style="height: calc(100% - 46px)"
     map-style="mapbox://styles/dorianfanet/clesfa2ur000p01ob0y77otqo"
     access-token='pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg'
-    :center="[0, 0]"
     :zoom="9"
     @mb-created="(mapboxInstance) => map = mapboxInstance"
   >
@@ -182,6 +181,7 @@ async function getWeather(coordinates){
           <Marker
             :temperature="mapData.currentLocation.weather.temp.day"
             :weather="mapData.currentLocation.weather.weather[0].id"
+            :link="[mapData.currentLocation.lon, mapData.currentLocation.lat]"
             type="current"
           />
         </MapboxMarker>
@@ -194,6 +194,7 @@ async function getWeather(coordinates){
             v-if="city.properties.dbscan === 'noise' && city.properties.weather"
             :temperature="city.properties.weather.temp"
             :weather="city.properties.weather.weather[0].id"
+            :link="city.geometry.coordinates"
           />
         </MapboxMarker>
         <MapboxMarker
@@ -205,6 +206,7 @@ async function getWeather(coordinates){
             v-if="city.properties.weather"
             :temperature="city.properties.weather.temp"
             :weather="city.properties.weather.weather[0].id"
+            :link="city.geometry.coordinates"
           />
         </MapboxMarker>
       </div>

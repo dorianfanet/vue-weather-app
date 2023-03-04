@@ -13,7 +13,8 @@ import Overcast from '../assets/Overcast.vue';
 const props = defineProps({
   temperature: Number,
   weather: Number,
-  type: String
+  type: String,
+  link: Array
 })
 
 console.log(props)
@@ -21,7 +22,7 @@ console.log(props)
 </script>
 
 <template>
-  <div :class="{ marker: weather, current: type === 'current' }">
+  <router-link :to="`/${link && link[1]}_${link && link[0]}`" :class="{ marker: weather, current: type === 'current' }">
     <Thunderstorm v-if="weather && weather >= 200 && weather <= 299" />
     <Drizzle v-if="weather && weather >= 300 && weather <= 399"/>
     <Shower v-if="weather && weather >= 500 && weather <= 599"/>
@@ -33,7 +34,7 @@ console.log(props)
     <Scattered v-if="weather === 802"/>
     <Overcast v-if="weather === 803 || weather === 804 "/>
     <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature) }}º</p>
-  </div>
+  </router-link>
 </template>
 
 <style scoped>
@@ -46,6 +47,10 @@ console.log(props)
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 10px;
+  transition: all 200ms ease;
+}
+.marker:hover{
+  transform: scale(1.1);
 }
 .current{
   background-color: var(--accentColor);
@@ -56,5 +61,6 @@ console.log(props)
 }
 .marker p{
   font-size: 18px;
+  margin: 0;
 }
 </style>

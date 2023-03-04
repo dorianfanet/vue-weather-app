@@ -1,5 +1,32 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const route = useRoute()
+const router = useRouter()
+
+const props = defineProps({
+  coordinates: String
+})
+
+const location = ref('')
+
+onMounted(async () => {
+  updateLocationName(route.params.id)
+})
+
+watch(() => route.params.id, (newId) => {
+  updateLocationName(newId)
+})
+
+function updateLocationName(newId){
+  const splittedId = (newId as string).split('_')
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${splittedId[1]},${splittedId[0]}.json?limit=1&access_token=pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg`)
+  .then(response => response.json())
+  .then(response => {
+    location.value = `${response.features[0].context.find(e => e.id.includes('place')).text}, ${response.features[0].context.find(e => e.id.includes('country')).text}`
+  })
+}
 
 interface AutocompletType {
     lat: Number,
@@ -10,20 +37,24 @@ interface AutocompletType {
 
 const searchInput = ref('')
 const autocomplete = ref<AutocompletType[]>([])
-const location = ref('')
 
 watch(searchInput, (newSearchInput) => {
   if(newSearchInput.length > 1){
-    fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${newSearchInput}&limit=5&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${newSearchInput}.json?access_token=pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg`)
     .then(response => response.json())
-    .then(data => autocomplete.value = data)
+    .then(data => autocomplete.value = data.features)
   }
 })
 
 function handleLinkClick(loc: string){
   autocomplete.value = []
   searchInput.value = ''
-  location.value = loc
+}
+
+function handleInputSubmit(){
+  router.push(`${autocomplete.value[0].geometry.coordinates[1]}_${autocomplete.value[0].geometry.coordinates[0]}`)
+  autocomplete.value = []
+  searchInput.value = ''
 }
 </script>
 
@@ -31,10 +62,13 @@ function handleLinkClick(loc: string){
   <header class="header">
     <h1>{{ location }}</h1>
     <div class="inputContainer">
-      <input v-model="searchInput" type="text" placeholder="Search location" class="searchInput">
+      <form action="" @submit="handleInputSubmit">
+        <input v-model="searchInput" type="text" placeholder="Search location" class="searchInput">
+        <button class="submit-btn" type="submit"></button>
+      </form>
       <ul v-if="autocomplete.length > 0" class="autocomplete">
         <li v-for="result in autocomplete">
-          <router-link :to='`${result.lat}_${result.lon}`' @click="() => handleLinkClick(`${result.name}, ${result.state}`)">{{ result.name }}, {{ result.state }}</router-link>
+          <router-link :to='`${result.geometry.coordinates[1]}_${result.geometry.coordinates[0]}`' @click="handleLinkClick">{{ result.place_name }}</router-link>
         </li>
       </ul>
     </div>
@@ -103,6 +137,10 @@ function handleLinkClick(loc: string){
   background-color: var(--thirdColor);
 }
 
+.submit-btn{
+  display: none;
+}
+
 @media screen and (max-width: 1024px) {
   .header{
     flex-direction: column;
@@ -110,6 +148,12 @@ function handleLinkClick(loc: string){
   .inputContainer{
     top: 45px;
     width: 70%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .inputContainer{
+    width: 100%;
   }
 }
 
