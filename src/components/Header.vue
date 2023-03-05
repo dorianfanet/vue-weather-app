@@ -12,19 +12,21 @@ const props = defineProps({
 const location = ref('')
 
 onMounted(async () => {
-  updateLocationName(route.params.id)
+  updateLocationName(route.params.id as string)
 })
 
 watch(() => route.params.id, (newId) => {
-  updateLocationName(newId)
+  updateLocationName(newId as string)
 })
 
-function updateLocationName(newId){
+function updateLocationName(newId: string){
   const splittedId = (newId as string).split('_')
   fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${splittedId[1]},${splittedId[0]}.json?limit=1&access_token=pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg`)
   .then(response => response.json())
   .then(response => {
-    location.value = `${response.features[0].context.find(e => e.id.includes('place')).text}, ${response.features[0].context.find(e => e.id.includes('country')).text}`
+    const loc = `${response.features[0].context.find((e: {id: string, text: string}) => e.id.includes('place')).text}, ${response.features[0].context.find((e: {id: string, text: string}) => e.id.includes('country')).text}`
+    location.value = loc
+    document.title = loc
   })
 }
 
@@ -43,6 +45,8 @@ watch(searchInput, (newSearchInput) => {
     fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${newSearchInput}.json?access_token=pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg`)
     .then(response => response.json())
     .then(data => autocomplete.value = data.features)
+  } else {
+    autocomplete.value = []
   }
 })
 

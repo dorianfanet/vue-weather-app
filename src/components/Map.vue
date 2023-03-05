@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import 'mapbox-gl/dist/mapbox-gl.css'
-import { onMounted, ref, watch, h } from 'vue';
+import { onMounted, onUnmounted, ref, watch, h } from 'vue';
 import { lineString, point, featureCollection } from '@turf/helpers'
 import bbox from '@turf/bbox'
 import clustersDbscan from '@turf/clusters-dbscan'
@@ -8,6 +8,7 @@ import mapboxgl from 'mapbox-gl'
 import Marker from './Marker.vue'
 import { MapboxMap, MapboxMarker } from '@studiometa/vue-mapbox-gl';
 
+const mapTheme = ref(findTheme())
 // const geojson = {
 //   type: 'FeatureCollection',
 //   features: [
@@ -36,10 +37,17 @@ import { MapboxMap, MapboxMarker } from '@studiometa/vue-mapbox-gl';
 //   ]
 // };
 
+onMounted(() => {
+ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => mapTheme.value = findTheme());
+})
+
+onUnmounted(() => {
+  window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', () => mapTheme.value = findTheme());
+})
+
 const props = defineProps({
   mapData: Object
 })
-
 
 
 // const map = ref()
@@ -84,56 +92,56 @@ watch(() => props.mapData, (newMapData) => {
   //   center: [newMapData.currentLocation.lon, newMapData.currentLocation.lat]
   // })
 
-  let points = newMapData.otherLocations.map((pos) => {
-    return point([pos.longitude, pos.latitude])
-  })
-
-  if(newMapData.currentLocation){
-    console.log(points, [newMapData.currentLocation.lon, newMapData.currentLocation.lat])
-    points.push(point([newMapData.currentLocation.lon, newMapData.currentLocation.lat]))
-  }
-
-
-  const clusterScan = clustersDbscan(featureCollection(points), 30)
-
-  clusteredData.value = {
-    noise: clusterScan.features.filter(e => e.properties.dbscan === 'noise'),
-    clusters: []
-  }
-  const clustersNmbs = [...new Set(clusterScan.features.map(e => e.properties.cluster))]
-  const filteredClustersNumbds = clustersNmbs.filter(e => e !== undefined)
-
-  for(let i = 0; i < filteredClustersNumbds.length; i++){
-    clusteredData.value = {
-      ...clusteredData.value,
-      clusters: [
-        ...clusteredData.value.clusters,
-        clusterScan.features.filter(e => e.properties.cluster === i).slice(0,1)[0]
-      ]
+  if(newMapData){
+    let points = newMapData.otherLocations.map((pos: {longitude: number, latitude: number}) => {
+      return point([pos.longitude, pos.latitude])
+    })
+  
+    if(newMapData.currentLocation){
+      console.log(points, [newMapData.currentLocation.lon, newMapData.currentLocation.lat])
+      points.push(point([newMapData.currentLocation.lon, newMapData.currentLocation.lat]))
     }
+  
+  
+    const clusterScan = clustersDbscan(featureCollection(points), 30)
+  
+    clusteredData.value = {
+      noise: clusterScan.features.filter(e => e.properties.dbscan === 'noise'),
+      clusters: []
+    }
+    const clustersNmbs = [...new Set(clusterScan.features.map(e => e.properties.cluster))]
+    const filteredClustersNumbds = clustersNmbs.filter(e => e !== undefined)
+  
+    for(let i = 0; i < filteredClustersNumbds.length; i++){
+      clusteredData.value = {
+        ...clusteredData.value,
+        clusters: [
+          ...clusteredData.value.clusters,
+          clusterScan.features.filter(e => e.properties.cluster === i).slice(0,1)[0]
+        ]
+      }
+    }
+  
+    clusteredData.value.noise.map(async (e: {geometry: {coordinates: Array<Number>}}, i: number) => {
+      clusteredData.value.noise[i].properties.weather = await getWeather(e.geometry.coordinates)
+      // return e.properties.weather = await getWeather(e.geometry.coordinates)
+    })
+  
+    clusteredData.value.clusters.map(async (e: {geometry: {coordinates: Array<Number>}}, i: number) => {
+      clusteredData.value.clusters[i].properties.weather = await getWeather(e.geometry.coordinates)
+      // return e.properties.weather = await getWeather(e.geometry.coordinates)
+    })
+  
+  
+    // const line = lineString(points)
+    const newBbox = bbox(clusterScan)
+  
+  
+    map.value.fitBounds(newBbox, {padding: 50})
   }
-
-  clusteredData.value.noise.map(async (e, i) => {
-    clusteredData.value.noise[i].properties.weather = await getWeather(e.geometry.coordinates)
-    // return e.properties.weather = await getWeather(e.geometry.coordinates)
-  })
-
-  clusteredData.value.clusters.map(async (e, i) => {
-    clusteredData.value.clusters[i].properties.weather = await getWeather(e.geometry.coordinates)
-    // return e.properties.weather = await getWeather(e.geometry.coordinates)
-  })
-
-
-  console.log(clusteredData.value)
-
-  // const line = lineString(points)
-  const newBbox = bbox(clusterScan)
-
-
-  map.value.fitBounds(newBbox, {padding: 50})
 })
 
-async function getWeather(coordinates){
+async function getWeather(coordinates: Array<Number>){
   const weather = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${coordinates[1]}&lon=${coordinates[0]}&units=metric&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
   .then(response => response.json())
   .then(data => {
@@ -151,15 +159,23 @@ async function getWeather(coordinates){
   }
 }
 
+function findTheme(){
+  console.log('change')
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'mapbox://styles/dorianfanet/clesfa2ur000p01ob0y77otqo'
+  } else {
+    return 'mapbox://styles/dorianfanet/clevgt5h8001c01nprbr4hgk5'
+  }
+}
 </script>
 
 <template>
   <MapboxMap
     style="height: calc(100% - 46px)"
-    map-style="mapbox://styles/dorianfanet/clesfa2ur000p01ob0y77otqo"
+    :map-style="mapTheme"
     access-token='pk.eyJ1IjoiZG9yaWFuZmFuZXQiLCJhIjoiY2xhMnV6eTlqMGluMDNxbWJjOG53YXoybSJ9.22QaZflXbYlMLrI3XS0BGg'
     :zoom="9"
-    @mb-created="(mapboxInstance) => map = mapboxInstance"
+    @mb-created="(mapboxInstance: object) => map = mapboxInstance"
   >
     <!-- <Transition name="fade">
       <MapboxMarker
@@ -176,12 +192,12 @@ async function getWeather(coordinates){
       <div>
         <MapboxMarker
           v-if="props.mapData && props.mapData.loading === false && props.mapData.currentLocation"
-          :lng-lat="[mapData.currentLocation.lon, mapData.currentLocation.lat]"
+          :lng-lat="[props.mapData.currentLocation.lon, props.mapData.currentLocation.lat]"
         >
           <Marker
-            :temperature="mapData.currentLocation.weather.temp.day"
-            :weather="mapData.currentLocation.weather.weather[0].id"
-            :link="[mapData.currentLocation.lon, mapData.currentLocation.lat]"
+            :temperature="props.mapData.currentLocation.weather.temp.day"
+            :weather="props.mapData.currentLocation.weather.weather[0].id"
+            :link="[props.mapData.currentLocation.lon, props.mapData.currentLocation.lat]"
             type="current"
           />
         </MapboxMarker>

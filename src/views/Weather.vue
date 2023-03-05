@@ -4,7 +4,10 @@ import { useRoute } from 'vue-router';
 import Header from '../components/Header.vue';
 import ForecastItem from '../components/ForecastItem.vue'
 import Map from '../components/Map.vue'
-// import forecast from '../data.json'
+import { useFavicon } from '@vueuse/core'
+import findIcon from '../composables/findIcon'
+
+const icon = useFavicon()
 
 const route = useRoute()
 
@@ -15,7 +18,10 @@ interface ForecastType {
       temp: {
         day: number
       },
-      prssure: number,
+      pressure: number,
+      humidity: number,
+      wind_speed: number,
+      wind_deg: number,
       weather: [
         {
           id: number
@@ -26,68 +32,41 @@ interface ForecastType {
 }
 
 interface MapDataType {
-  loading: boolean,
-  currentLocation: {
-    lat: number,
-    lon: number,
-    weather: {
-      temp: {
-        day: number
-      },
-      weather: [
-        {
-          id: number
-        }
-      ]
-    }
-  }
+  loading: boolean
 }
 
 const forecast = ref<ForecastType>()
 
-const mapData = ref<MapDataType>()
+const mapData = ref<MapDataType>({
+  loading: false
+})
 
 onMounted(async () => {
-  mapData.value = {
-    ...mapData.value,
-    loading: true
-  }
-
-  mapData.value = await getMapData(route.params.id)
-
+  mapData.value.loading = true
+  
   checkSize(window.innerWidth)
+
+  mapData.value = await getMapData(route.params.id as string)
+
+  icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
 })
 
 watch(() => route.params.id, async (newId) => {
-  mapData.value = {
-    ...mapData.value,
-    loading: true
-  }
-
-  mapData.value = await getMapData(newId)
+  mapData.value.loading = true
+  
+  mapData.value = await getMapData(newId as string)
+  icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
 })
 
-async function getMapData(newId){
-  const splittedId = (newId as string).split('_')
+async function getMapData(newId: string){
+  const splittedId = (newId).split('_')
   forecast.value = undefined
   const currentLocation = fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${splittedId[0]}&lon=${splittedId[1]}&units=metric&appid=${import.meta.env.VITE_WEATHER_API_KEY}`)
   .then(response => response.json())
   .then(data => {
     forecast.value = data
-    console.log(data)
 
     return data
-
-    // currentLocation = {
-    //     lat: data.lat,
-    //     lon: data.lon,
-    //     weather: {
-    //       temp: {
-    //         day: data.current.temp
-    //       },
-    //       weather: data.current.weather
-    //     }
-    //   }
   })
   .catch(err => console.log(err))
 
@@ -105,11 +84,6 @@ async function getMapData(newId){
       console.log(response)
       console.log(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${splittedId[0]}${splittedId[1].charAt(0) === '-' ? '' : '+'}${splittedId[1]}/nearbyCities?radius=100&limit=10&sort=-population&asciiMode=false&types=CITY`)
       return response
-      // fullMapData = {
-      //   currentLocation: currentLocation,
-      //   loading: false,
-      //   otherLocations: response.data
-      // }
     })
     .catch(err => console.error(err));
 
@@ -136,7 +110,7 @@ async function getMapData(newId){
 
 const widthRef = ref(8)
 
-function checkSize(size){
+function checkSize(size: number){
   if(size >= 1500){
     widthRef.value = 8
   } else {
