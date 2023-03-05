@@ -6,6 +6,7 @@ import bbox from '@turf/bbox'
 import clustersDbscan from '@turf/clusters-dbscan'
 import mapboxgl from 'mapbox-gl'
 import Marker from './Marker.vue'
+// @ts-ignore
 import { MapboxMap, MapboxMarker } from '@studiometa/vue-mapbox-gl';
 
 const mapTheme = ref(findTheme())

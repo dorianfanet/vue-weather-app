@@ -12,6 +12,13 @@ const icon = useFavicon()
 const route = useRoute()
 
 interface ForecastType {
+  current: {
+    weather: [
+      {
+        id: number
+      }
+    ]
+  }
   daily: [
     {
       dt: number,
@@ -48,14 +55,18 @@ onMounted(async () => {
 
   mapData.value = await getMapData(route.params.id as string)
 
-  icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
+  if(forecast.value && forecast.value.current){
+    icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
+  }
 })
 
 watch(() => route.params.id, async (newId) => {
   mapData.value.loading = true
   
   mapData.value = await getMapData(newId as string)
-  icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
+  if(forecast.value && forecast.value.current){
+    icon.value = `./assets/${findIcon(forecast.value.current.weather[0].id)}.svg`
+  }
 })
 
 async function getMapData(newId: string){

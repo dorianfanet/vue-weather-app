@@ -34,7 +34,11 @@ interface AutocompletType {
     lat: Number,
     lon: Number,
     name: String,
-    state: String
+    state: String,
+    geometry: {
+      coordinates: [number, number]
+    },
+    place_name: string
   }
 
 const searchInput = ref('')
@@ -50,7 +54,7 @@ watch(searchInput, (newSearchInput) => {
   }
 })
 
-function handleLinkClick(loc: string){
+function handleLinkClick(){
   autocomplete.value = []
   searchInput.value = ''
 }
