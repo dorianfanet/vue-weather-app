@@ -60,7 +60,7 @@ function handleLinkClick(){
 }
 
 function handleInputSubmit(){
-  router.push(`${autocomplete.value[0].geometry.coordinates[1]}_${autocomplete.value[0].geometry.coordinates[0]}`)
+  // router.push(`${autocomplete.value[0].geometry.coordinates[1]}_${autocomplete.value[0].geometry.coordinates[0]}`)
   autocomplete.value = []
   searchInput.value = ''
 }
