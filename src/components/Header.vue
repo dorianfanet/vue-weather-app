@@ -58,13 +58,17 @@ function handleLinkClick(){
   autocomplete.value = []
   searchInput.value = ''
 }
+
+function handleInputSubmit(e: Event){
+  e.preventDefault()
+}
 </script>
 
 <template>
   <header class="header">
     <h1>{{ location }}</h1>
     <div class="inputContainer">
-      <form action="">
+      <form action="" @submit="handleInputSubmit">
         <input v-model="searchInput" type="text" placeholder="Search location" class="searchInput">
       </form>
       <ul v-if="autocomplete.length > 0" class="autocomplete">
