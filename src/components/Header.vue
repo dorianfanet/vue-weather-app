@@ -58,21 +58,14 @@ function handleLinkClick(){
   autocomplete.value = []
   searchInput.value = ''
 }
-
-function handleInputSubmit(){
-  // router.push(`${autocomplete.value[0].geometry.coordinates[1]}_${autocomplete.value[0].geometry.coordinates[0]}`)
-  autocomplete.value = []
-  searchInput.value = ''
-}
 </script>
 
 <template>
   <header class="header">
     <h1>{{ location }}</h1>
     <div class="inputContainer">
-      <form action="" @submit="handleInputSubmit">
+      <form action="">
         <input v-model="searchInput" type="text" placeholder="Search location" class="searchInput">
-        <button class="submit-btn" type="submit"></button>
       </form>
       <ul v-if="autocomplete.length > 0" class="autocomplete">
         <li v-for="result in autocomplete">
