@@ -9,6 +9,7 @@ import Sunny from '../assets/Sunny.vue';
 import Few from '../assets/Few.vue';
 import Scattered from '../assets/Scattered.vue';
 import Overcast from '../assets/Overcast.vue';
+import WeatherIcon from './WeatherIcon.vue';
 
 const props = defineProps({
   date: Number,
@@ -64,16 +65,9 @@ function findWindDirection(wind_deg: number){
     <p v-if="props.date && first === 'no'" class="day">{{ daysOfTheWeek[new Date(props.date * 1000).getDay()] }}</p>
     <p v-else-if="props.date && (first === 'first' || first === 'first-full')" class="day">Today</p>
     <div class="content">
-      <Thunderstorm v-if="weather && weather >= 200 && weather <= 299" />
-      <Drizzle v-if="weather && weather >= 300 && weather <= 399"/>
-      <Shower v-if="weather && weather >= 500 && weather <= 599"/>
-      <LightSnow v-if="weather === 600 || weather === 612 || weather === 620"/>
-      <Sleet v-else-if="weather === 611 || weather === 615 || weather === 616"/>
-      <Snow v-else-if="weather && weather >= 600 && weather <= 699"/>
-      <Sunny v-if="weather === 800"/>
-      <Few v-if="weather === 801"/>
-      <Scattered v-if="weather === 802"/>
-      <Overcast v-if="weather === 803 || weather === 804 "/>
+      <WeatherIcon
+        :weather="weather"
+      />
       <div v-if="first === 'no' || first === 'first'" class="temp-container">
         <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature.day) }}º</p>
         <p v-if="props.temperature" class="temp-min">{{ Math.floor(props.temperature.min) }}º</p>
@@ -84,7 +78,7 @@ function findWindDirection(wind_deg: number){
         <br>
         <p v-if="props.pressure">Pressure: <strong>{{ Math.floor(props.pressure) }} hPa</strong></p>
         <p v-if="props.humidity">Humidity: <strong>{{ Math.floor(props.humidity) }}%</strong></p>
-        <p v-if="props.wind">Wind: <strong>{{ Math.floor(props.wind.speed) * 3.6 }} km/h {{ findWindDirection(props.wind.direction) }}</strong></p>
+        <p v-if="props.wind">Wind: <strong>{{ Math.floor(props.wind.speed * 3.6) }} km/h {{ findWindDirection(props.wind.direction) }}</strong></p>
       </div>
     </div>
   </div>
@@ -98,13 +92,9 @@ function findWindDirection(wind_deg: number){
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  height: calc(100% - 60px);
+  height: 240px;
   justify-content: space-between;
   min-width: 95px;
-}
-.f-item-container svg{
-  width: 70%;
-  max-width: 200px;
 }
 .content{
   margin-top: 20px;
@@ -113,6 +103,7 @@ function findWindDirection(wind_deg: number){
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 .day{
   font-size: 24px;
@@ -155,10 +146,6 @@ function findWindDirection(wind_deg: number){
 .f-item-container.first-full .desc p{
   margin: 0;
 }
-.f-item-container.first-full svg{
-  height: 100%;
-  max-width: 180px;
-}
 .f-item-container.first-full .temp-min{
   color: rgba(12, 12, 12, 0.457);
 }
@@ -174,6 +161,7 @@ function findWindDirection(wind_deg: number){
     flex-direction: row;
     margin: 0;
     gap: 20px;
+    width: unset;
   }
   .f-item-container svg{
     max-height: 40px;
@@ -189,6 +177,27 @@ function findWindDirection(wind_deg: number){
   }
   .temp-min{
     font-size: 18px;
+  }
+}
+</style>
+
+<style>
+.f-item-container:not(.first) svg{
+  width: 70%;
+  max-width: 200px;
+  max-height: 100px;
+}
+.f-item-container.first-full svg{
+  height: 100%;
+  max-width: 180px;
+}
+@media screen and (max-width: 768px) {
+  .f-item-container.first svg{
+    height: 70px;
+    max-height: 70px;
+  }
+  .f-item-container:not(.first) svg{
+    height: 70px;
   }
 }
 </style>

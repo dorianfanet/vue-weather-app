@@ -9,6 +9,7 @@ import Sunny from '../assets/Sunny.vue';
 import Few from '../assets/Few.vue';
 import Scattered from '../assets/Scattered.vue';
 import Overcast from '../assets/Overcast.vue';
+import WeatherIcon from './WeatherIcon.vue';
 
 const props = defineProps({
   temperature: Number,
@@ -21,21 +22,16 @@ const props = defineProps({
 
 <template>
   <router-link :to="`/${link && link[1]}_${link && link[0]}`" :class="{ marker: weather, current: type === 'current' }">
-    <Thunderstorm v-if="weather && weather >= 200 && weather <= 299" />
-    <Drizzle v-if="weather && weather >= 300 && weather <= 399"/>
-    <Shower v-if="weather && weather >= 500 && weather <= 599"/>
-    <LightSnow v-if="weather === 600 || weather === 612 || weather === 620"/>
-    <Sleet v-else-if="weather === 611 || weather === 615 || weather === 616"/>
-    <Snow v-else-if="weather && weather >= 600 && weather <= 699"/>
-    <Sunny v-if="weather === 800"/>
-    <Few v-if="weather === 801"/>
-    <Scattered v-if="weather === 802"/>
-    <Overcast v-if="weather === 803 || weather === 804 "/>
+    <WeatherIcon
+      :weather="weather"
+    />
     <p v-if="props.temperature" class="temp">{{ Math.floor(props.temperature) }}º</p>
   </router-link>
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 .marker{
   background-color: var(--mainColor);
   padding: 1em;
@@ -46,6 +42,7 @@ const props = defineProps({
   align-items: center;
   gap: 10px;
   transition: all 200ms ease;
+  font-family: Outfit;
 }
 .marker:hover{
   transform: scale(1.1);

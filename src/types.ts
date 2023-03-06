@@ -22,6 +22,19 @@ export interface ForecastType {
         }
       ]
     }
+  ],
+  hourly: [
+    {
+      dt: number,
+      temp: number,
+      wind_speed: number,
+      wind_deg: number,
+      weather: [
+        {
+          id: number
+        }
+      ]
+    }
   ]
 }
 

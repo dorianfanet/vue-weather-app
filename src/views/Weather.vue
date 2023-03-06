@@ -6,41 +6,12 @@ import ForecastItem from '../components/ForecastItem.vue'
 import Map from '../components/Map.vue'
 import { useFavicon } from '@vueuse/core'
 import findIcon from '../composables/findIcon'
+import { ForecastType, MapDataType } from '../types';
+import HourlyForecastItem from '../components/HourlyForecastItem.vue';
 
 const icon = useFavicon()
 
 const route = useRoute()
-
-interface ForecastType {
-  current: {
-    weather: [
-      {
-        id: number
-      }
-    ]
-  }
-  daily: [
-    {
-      dt: number,
-      temp: {
-        day: number
-      },
-      pressure: number,
-      humidity: number,
-      wind_speed: number,
-      wind_deg: number,
-      weather: [
-        {
-          id: number
-        }
-      ]
-    }
-  ]
-}
-
-interface MapDataType {
-  loading: boolean
-}
 
 const forecast = ref<ForecastType>()
 
@@ -92,8 +63,6 @@ async function getMapData(newId: string){
   const otherLocations = fetch(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${splittedId[0]}${splittedId[1].charAt(0) === '-' ? '' : '+'}${splittedId[1]}/nearbyCities?radius=100&limit=10&sort=-population&asciiMode=false&types=CITY`, options)
     .then(response => response.json())
     .then(response => {
-      console.log(response)
-      console.log(`https://wft-geo-db.p.rapidapi.com/v1/geo/locations/${splittedId[0]}${splittedId[1].charAt(0) === '-' ? '' : '+'}${splittedId[1]}/nearbyCities?radius=100&limit=10&sort=-population&asciiMode=false&types=CITY`)
       return response
     })
     .catch(err => console.error(err));
@@ -137,7 +106,6 @@ function checkSize(size: number){
   }
 }
 
-
 onMounted(() => {
   window.addEventListener('resize', () => checkSize(window.innerWidth))
 })
@@ -150,7 +118,7 @@ onUnmounted(() => {
   <Header />
   <main class="container">
     <section class="forecast">
-      <h2 class="forecast-title">Next {{ widthRef - 1 }} days</h2>
+      <h2 class="section-title">Next {{ widthRef - 1 }} days</h2>
       <Transition name="fade">
         <ul v-if="forecast" class="forecast-container">
           <li v-for="(day, index) in forecast.daily.slice(0,widthRef)" :key="day.dt">
@@ -167,8 +135,24 @@ onUnmounted(() => {
         </ul>
       </Transition>
     </section>
+    <section class="next-hours">
+      <h2 class="section-title">Next 24 hours</h2>
+      <Transition name="fade">
+        <ul v-if="forecast" class="next-hours-container">
+          <li v-for="(hour, index) in forecast.hourly.slice(0, 24)" :key="hour.dt">
+            <HourlyForecastItem 
+              :date="hour.dt"
+              :temperature="hour.temp"
+              :wind="{speed: hour.wind_speed, direction: hour.wind_deg}"
+              :weather="hour.weather[0].id"
+              :first="index === 0 ? true : false"
+            />
+          </li>
+        </ul>
+      </Transition>
+    </section>
     <section class="map">
-      <h2 class="forecast-title">Weather map</h2>
+      <h2 class="section-title">Weather map</h2>
       <Map
       v-if="mapData"
       :mapData="mapData"
@@ -189,15 +173,18 @@ onUnmounted(() => {
 }
 main.container{
   display: grid;
-  grid-template-rows: 346px 1fr;
+  width: 100%;
+  grid-template-rows: 346px calc(100% - 386px);
+  grid-template-columns: minmax(350px, 500px) 1fr;
   margin-top: 60px;
   height: calc(100vh - 95px - 4rem);
   gap: 40px;
 }
 .forecast{
   width: 100%;
+  grid-column: 1 / 3;
 }
-.forecast-title{
+.section-title{
   text-align: left;
   margin: 0 0 10px 0;
 }
@@ -210,11 +197,27 @@ main.container{
   height: calc(100% - 46px);
 }
 .forecast-container li{
-  list-style-type: none;
   height: 100%;
 }
 
+.next-hours-container{
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  height: calc(100% - 46px);
+  margin: 0;
+  gap: 15px;
+}
+
 @media screen and (max-width: 768px) {
+  .forecast{
+    grid-column: unset;
+  }
+  main.container{
+    grid-template-rows: repeat(3, 346px);
+    grid-template-columns: 1fr;
+    height: unset;
+  }
   .forecast-container{
     grid-template-columns: unset;
     grid-template-rows: repeat(v-bind(widthRef), 1fr);
