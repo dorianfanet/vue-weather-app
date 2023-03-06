@@ -16,7 +16,8 @@ const props = defineProps({
 
 <template>
 <div class="hrl-container" :class="{ 'first': first }">
-  <p v-if="date" class="day">{{ new Date(date * 1000).getHours() }}:00</p>
+  <p v-if="date && !first" class="day">{{ new Date(date * 1000).getHours() }}:00</p>
+  <p v-if="first" class="day">Now</p>
   <div class="content">
     <WeatherIcon
         :weather="weather"
