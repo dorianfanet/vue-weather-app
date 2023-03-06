@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const route = useRoute()
-const router = useRouter()
-
-const props = defineProps({
-  coordinates: String
-})
 
 const location = ref('')
 

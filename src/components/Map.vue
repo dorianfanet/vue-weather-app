@@ -1,42 +1,13 @@
 <script setup lang="ts">
-// import 'mapbox-gl/dist/mapbox-gl.css'
-import { onMounted, onUnmounted, ref, watch, h } from 'vue';
-import { lineString, point, featureCollection } from '@turf/helpers'
+import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { point, featureCollection } from '@turf/helpers'
 import bbox from '@turf/bbox'
 import clustersDbscan from '@turf/clusters-dbscan'
-import mapboxgl from 'mapbox-gl'
 import Marker from './Marker.vue'
 // @ts-ignore
 import { MapboxMap, MapboxMarker } from '@studiometa/vue-mapbox-gl';
 
 const mapTheme = ref(findTheme())
-// const geojson = {
-//   type: 'FeatureCollection',
-//   features: [
-//     {
-//       type: 'Feature',
-//       geometry: {
-//         type: 'Point',
-//         coordinates: [-77.032, 38.913]
-//       },
-//       properties: {
-//         title: 'Mapbox',
-//         description: 'Washington, D.C.'
-//       }
-//     },
-//     {
-//       type: 'Feature',
-//       geometry: {
-//         type: 'Point',
-//         coordinates: [-122.414, 37.776]
-//       },
-//       properties: {
-//         title: 'Mapbox',
-//         description: 'San Francisco, California'
-//       }
-//     }
-//   ]
-// };
 
 onMounted(() => {
  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => mapTheme.value = findTheme());
@@ -50,49 +21,11 @@ const props = defineProps({
   mapData: Object
 })
 
-
-// const map = ref()
-
-// const actMarker = ref(null)
-
-// onMounted(() => {
-//   map.value = new mapboxgl.Map({
-//     container: 'map',
-//     style: 'mapbox://styles/dorianfanet/clesfa2ur000p01ob0y77otqo',
-//     center: [-74.5, 40],
-//     zoom: 9,
-//   })
-
-//   // for (const feature of geojson.features) {
-//   // // create a HTML element for each feature
-//   //   const el = document.createElement('div');
-//   //   el.className = 'marker';
-
-//   //   // make a marker for each feature and add to the map
-//   //   new mapboxgl.Marker(el).setLngLat(feature.geometry.coordinates).addTo(map.value);
-//   // }
-// })
 const map = ref()
 
 const clusteredData = ref()
 
-watch(() => clusteredData, (newClusteredData) => {
-  console.log(newClusteredData)
-})
-
 watch(() => props.mapData, (newMapData) => {
-  console.log(newMapData)
-
-  // const el = document.createElement('div');
-  // el.className = 'marker';
-  // const marker = new mapboxgl.Marker(el)
-  //   .setLngLat([newMapData.currentLocation.lon, newMapData.currentLocation.lat])
-  //   .addTo(map.value)
-  
-  // map.value.flyTo({
-  //   center: [newMapData.currentLocation.lon, newMapData.currentLocation.lat]
-  // })
-
   if(newMapData){
     let points = newMapData.otherLocations.map((pos: {longitude: number, latitude: number}) => {
       return point([pos.longitude, pos.latitude])
@@ -125,18 +58,13 @@ watch(() => props.mapData, (newMapData) => {
   
     clusteredData.value.noise.map(async (e: {geometry: {coordinates: Array<Number>}}, i: number) => {
       clusteredData.value.noise[i].properties.weather = await getWeather(e.geometry.coordinates)
-      // return e.properties.weather = await getWeather(e.geometry.coordinates)
     })
   
     clusteredData.value.clusters.map(async (e: {geometry: {coordinates: Array<Number>}}, i: number) => {
       clusteredData.value.clusters[i].properties.weather = await getWeather(e.geometry.coordinates)
-      // return e.properties.weather = await getWeather(e.geometry.coordinates)
     })
   
-  
-    // const line = lineString(points)
     const newBbox = bbox(clusterScan)
-  
   
     map.value.fitBounds(newBbox, {padding: 50})
   }
@@ -178,17 +106,6 @@ function findTheme(){
     :zoom="9"
     @mb-created="(mapboxInstance: object) => map = mapboxInstance"
   >
-    <!-- <Transition name="fade">
-      <MapboxMarker
-        v-if="props.mapData && props.mapData.loading === false"
-        :lng-lat="[props.mapData.currentLocation.lon, props.mapData.currentLocation.lat]"
-      >
-        <Marker
-          :temperature="props.mapData.currentLocation.weather.temp"
-          :weather="props.mapData.currentLocation.weather.weather[0].id"
-        />
-      </MapboxMarker>
-    </Transition> -->
     <Transition name="fade">
       <div>
         <MapboxMarker

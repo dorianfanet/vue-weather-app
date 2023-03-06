@@ -150,7 +150,7 @@ onUnmounted(() => {
   <Header />
   <main class="container">
     <section class="forecast">
-      <h2 class="forecast-title">Next 7 days</h2>
+      <h2 class="forecast-title">Next {{ widthRef - 1 }} days</h2>
       <Transition name="fade">
         <ul v-if="forecast" class="forecast-container">
           <li v-for="(day, index) in forecast.daily.slice(0,widthRef)" :key="day.dt">

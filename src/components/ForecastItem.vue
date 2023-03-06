@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import Drizzle from '../assets/Drizzle.vue';
 import Thunderstorm from '../assets/Thunderstorm.vue';
 import Shower from '../assets/Shower.vue';
@@ -21,10 +20,7 @@ const props = defineProps({
   first: String
 })
 
-const isActive = ref(false)
-
 const daysOfTheWeek = ["Sun", 'Mon', 'Tue', 'Wed', 'Thu', "Fri", "Sat"]
-const fullDaysOfTheWeek = ["Sunday", 'Monday', 'Tuesday', 'Wednesday', 'Thursday', "Friday", "Saturday"]
 
 function findWindDirection(wind_deg: number){
   if (wind_deg>11.25 && wind_deg<33.75){

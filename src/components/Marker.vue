@@ -17,8 +17,6 @@ const props = defineProps({
   link: Array
 })
 
-console.log(props)
-
 </script>
 
 <template>
