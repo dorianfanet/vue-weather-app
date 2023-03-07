@@ -154,7 +154,7 @@ function findWindDirection(wind_deg: number){
   .f-item-container{
     flex-direction: row;
     padding: 10px 20px;
-    height: calc(100% - 20px);
+    height: 75px;
     border-radius: 20px;
   }
   .content{
@@ -182,7 +182,7 @@ function findWindDirection(wind_deg: number){
 </style>
 
 <style>
-.f-item-container:not(.first) svg{
+.f-item-container svg{
   width: 70%;
   max-width: 200px;
   max-height: 100px;

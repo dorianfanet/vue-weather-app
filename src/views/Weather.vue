@@ -89,21 +89,29 @@ async function getMapData(newId: string){
 }
 
 const widthRef = ref(8)
+const innerWidth = ref(window.innerWidth)
 
 function checkSize(size: number){
-  if(size >= 1500){
+  if(size > 768){
+    if(size >= 1500){
+      widthRef.value = 8
+    } else {
+      const buffer = Math.abs(size - 1500)
+      const rest = Math.floor(buffer / 100)
+      
+      const result = 8 - rest
+      if(result < 4){
+        widthRef.value = 3
+      } else {
+        widthRef.value = 8 - rest
+      }
+    }
+  } else if(mobileFcstShowMore.value) {
     widthRef.value = 8
   } else {
-    const buffer = Math.abs(size - 1500)
-    const rest = Math.floor(buffer / 100)
-    
-    const result = 8 - rest
-    if(result < 4){
-      widthRef.value = 3
-    } else {
-      widthRef.value = 8 - rest
-    }
+    widthRef.value = 3
   }
+  innerWidth.value = window.innerWidth
 }
 
 onMounted(() => {
@@ -112,11 +120,25 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', () => checkSize(window.innerWidth))
 })
+
+const mobileFcstShowMore = ref(false)
+
+function toggleMobileFcstShowMore(){
+  if(mobileFcstShowMore.value === true){
+    mobileFcstShowMore.value = false
+    widthRef.value = 3
+    console.log('true')
+  } else {
+    mobileFcstShowMore.value = true
+    widthRef.value = 8
+    console.log(widthRef)
+  }
+}
 </script>
 
 <template>
   <Header />
-  <main class="container">
+  <main class="container" :class="{ 'mobileFcstShowMore': mobileFcstShowMore }">
     <section class="forecast">
       <h2 class="section-title">Next {{ widthRef - 1 }} days</h2>
       <Transition name="fade">
@@ -129,11 +151,12 @@ onUnmounted(() => {
               :humidity="day.humidity"
               :wind="{speed: day.wind_speed, direction: day.wind_deg}"
               :weather="day.weather[0].id"
-              :first="index === 0 ? widthRef < 5 ? 'first' : 'first-full' : 'no'"
+              :first="index === 0 ? innerWidth < 1101 ? 'first' : 'first-full' : 'no'"
             />
           </li>
         </ul>
       </Transition>
+      <p class="show-more" @click="toggleMobileFcstShowMore()">{{ mobileFcstShowMore ? 'Show less...' : 'Show more...' }}</p>
     </section>
     <section class="next-hours">
       <h2 class="section-title">Next 24 hours</h2>
@@ -199,6 +222,9 @@ main.container{
 .forecast-container li{
   height: 100%;
 }
+.show-more{
+  display: none;
+}
 
 .next-hours-container{
   display: flex;
@@ -214,13 +240,26 @@ main.container{
     grid-column: unset;
   }
   main.container{
-    grid-template-rows: repeat(3, 346px);
+    grid-template-rows: 362px repeat(2, 346px);
     grid-template-columns: 1fr;
     height: unset;
+    transition: all 300ms ease;
+  }
+  main.container.mobileFcstShowMore{
+    grid-template-rows: 911px repeat(2, 346px);
+  }
+  main.container.mobileFcstShowMore .forecast-container{
+    height: 865px;
   }
   .forecast-container{
     grid-template-columns: unset;
     grid-template-rows: repeat(v-bind(widthRef), 1fr);
+    height: 316px;
+    transition: all 300ms ease;
+  }
+  .show-more{
+    display: block;
+    margin: 10px 0 0 0;
   }
 }
 </style>
